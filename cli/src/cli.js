@@ -9,6 +9,8 @@ let username
 let server
 let host
 let port
+let cmd
+let cmdPrev
 
 cli
   .delimiter(cli.chalk['yellow']('ftd~$'))
@@ -34,8 +36,20 @@ cli
     }
 
     server.on('data', (buffer) => {
-      this.log(Message.fromJSON(buffer).toString())
-      // }
+      let cmd = Message.fromJSON(buffer).command
+      if (cmd === 'echo') {
+        this.log(cli.chalk['gray'](Message.fromJSON(buffer).toString()))
+      } else if (cmd === 'broadcast') {
+        this.log(cli.chalk['blue'](Message.fromJSON(buffer).toString()))
+      } else if (cmd === 'users') {
+        this.log(cli.chalk['cyan'](Message.fromJSON(buffer).toString()))
+      } else if (cmd === 'direct') {
+        this.log(cli.chalk['magenta'](Message.fromJSON(buffer).toString()))
+      } else if (cmd === 'connect' || cmd === 'disconnect') {
+        this.log(cli.chalk['red'](Message.fromJSON(buffer).toString()))
+      } else {
+        this.log(cli.chalk['white'](Message.fromJSON(buffer).toString()))
+      }
     })
 
     server.on('end', () => {
@@ -47,26 +61,30 @@ cli
     const contents = rest.join(' ')
 
     if (command === 'disconnect') {
+      cmd = command
       server.end(new Message({ username, command }).toJSON() + '\n')
     } else if (command === 'echo') {
+      cmd = command
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else if (command === 'broadcast') {
+      cmd = command
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else if (command === 'users') {
+      cmd = command
       server.write(new Message({ username, command }).toJSON() + '\n')
     } else if (input.charAt(0) === '@') {
-      let cmd = '@' + command
+      cmd = '@' + command
       server.write(new Message({ username, command: cmd, contents }).toJSON() + '\n')
     } else if (Message.cmdPrev !== 'undefined') {
-      this.log('In Previous Cmd Block')
-      let cmd = Message.cmdPrev
+      cmd = cmdPrev
       let cnts = input
       server.write(new Message({ username, command: cmd, contents: cnts }).toJSON() + '\n')
     } else {
-      this.log(`Command <${command}> was not recognized`)
+      cmdPrev = 'undefined'
+      this.log(`A command is required.`)
     }
 
-    this.log('Previous Command: ' + Message.cmdPrev)
+    cmdPrev = cmd
 
     callback()
   })

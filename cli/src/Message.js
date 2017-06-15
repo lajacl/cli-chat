@@ -19,22 +19,6 @@ export class Message {
     })
   }
 
-  txtcolor () {
-    let cmd = this.command
-
-    if (cmd === 'echo') {
-      return 'black'
-    } else if (cmd === 'broadcast') {
-      return 'blue'
-    } else if (cmd === 'users') {
-      return 'gray'
-    } else if (cmd === 'direct') {
-      return 'magenta'
-    } else if (cmd === 'connect' || Message.command === 'disconnect') {
-      return 'red'
-    } else return 'white'
-  }
-
   toString () {
     if (this.command === 'echo') {
       return `${this.timestamp} <${this.username}> (echo): ${this.contents}`
