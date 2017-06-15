@@ -39,7 +39,7 @@ public class Message {
 	}
 
 	public void setTimestamp() {
-		this.timestamp = new SimpleDateFormat("MMMM dd, yyyy hh:mm a").format(new Date());
+		this.timestamp = new SimpleDateFormat("E ~ MMMM dd, yyyy > hh:mm a").format(new Date());
 	}
 	
 }

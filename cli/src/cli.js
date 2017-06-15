@@ -9,8 +9,6 @@ let username
 let server
 let host
 let port
-let cmdPrev
-let cmdSpecial
 
 cli
   .delimiter(cli.chalk['yellow']('ftd~$'))
@@ -36,7 +34,8 @@ cli
     }
 
     server.on('data', (buffer) => {
-      this.log(cli.chalk['red'](Message.fromJSON(buffer).toString()))
+      this.log(Message.fromJSON(buffer).toString())
+      // }
     })
 
     server.on('end', () => {
@@ -47,24 +46,27 @@ cli
     const [ command, ...rest ] = words(input)
     const contents = rest.join(' ')
 
-    if (command.charAt(0) === '@') {
-      cmdSpecial = 'direct'
-      server.write(new Message({ username, command, contents }).toJSON() + '\n')
-    } else if (command === 'disconnect') {
+    if (command === 'disconnect') {
       server.end(new Message({ username, command }).toJSON() + '\n')
     } else if (command === 'echo') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else if (command === 'broadcast') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
-    } else if (command === 'direct') {
-      server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else if (command === 'users') {
       server.write(new Message({ username, command }).toJSON() + '\n')
+    } else if (input.charAt(0) === '@') {
+      let cmd = '@' + command
+      server.write(new Message({ username, command: cmd, contents }).toJSON() + '\n')
+    } else if (Message.cmdPrev !== 'undefined') {
+      this.log('In Previous Cmd Block')
+      let cmd = Message.cmdPrev
+      let cnts = input
+      server.write(new Message({ username, command: cmd, contents: cnts }).toJSON() + '\n')
     } else {
       this.log(`Command <${command}> was not recognized`)
     }
 
-    cmdPrev = command
+    this.log('Previous Command: ' + Message.cmdPrev)
 
     callback()
   })

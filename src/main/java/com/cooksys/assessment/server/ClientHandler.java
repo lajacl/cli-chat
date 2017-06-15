@@ -22,6 +22,7 @@ public class ClientHandler implements Runnable {
 	private Server server;
 	private List<ClientHandler> clientList;
 	private String user = "";
+	private String receiver;
 	
 	public ClientHandler(Socket socket, Server server) {
 		super();
@@ -39,8 +40,15 @@ public class ClientHandler implements Runnable {
 			while (!socket.isClosed()) {
 				String raw = reader.readLine();
 				Message message = mapper.readValue(raw, Message.class);
+				
 				message.setTimestamp();
-
+				
+				// check if a direct message
+				if (message.getCommand().charAt(0) == '@') {
+					receiver = message.getCommand().substring(1);
+					message.setCommand("direct");
+				}
+				
 				switch (message.getCommand()) {
 					case "connect":
 						log.info("{}: <{}> has connected", message.getTimestamp(), message.getUsername());
@@ -83,6 +91,15 @@ public class ClientHandler implements Runnable {
 					case "direct":
 						log.info("{} <{}> (whisper): {}", message.getTimestamp(), message.getUsername(), message.getContents());
 						// TO DO
+						response = mapper.writeValueAsString(message);
+						clientList = server.getClientList();						
+						for(ClientHandler client: clientList) {
+							if (client.getUser().equals(receiver)) {
+								client.writer.write(response);
+								client.writer.flush();
+								break;
+							}
+						}						
 						break;
 					case "users":
 						clientList = server.getClientList();
