@@ -21,7 +21,6 @@ cli
     host = '' + args.host
     port = args.port
 
-    this.log('Host: ' + host + ' Port: ' + port)
     if ((typeof host !== 'undefined') && (typeof port !== 'undefined')) {
       server = connect({ host: host, port: port }, () => {
         server.write(new Message({ username, command: 'connect' }).toJSON() + '\n')
@@ -50,6 +49,10 @@ cli
       server.end(new Message({ username, command }).toJSON() + '\n')
     } else if (command === 'echo') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
+    } else if (command === 'broadcast') {
+      server.write(new Message({ username, command, contents }).toJSON() + '\n')
+    } else if (command === 'users') {
+      server.write(new Message({ username, command }).toJSON() + '\n')
     } else {
       this.log(`Command <${command}> was not recognized`)
     }

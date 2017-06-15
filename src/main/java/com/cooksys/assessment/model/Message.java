@@ -1,6 +1,8 @@
 package com.cooksys.assessment.model;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Message {
 
@@ -34,7 +36,7 @@ public class Message {
 	}
 
 	public String getTimestamp() {
-		this.timestamp = new Timestamp(0).toString();
+		this.timestamp = new SimpleDateFormat("MMMM dd, yyyy hh:mm:ss a").format(new Date());
 		return timestamp;
 	}
 
