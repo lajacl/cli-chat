@@ -20,6 +20,8 @@ public class ClientHandler implements Runnable {
 	private Socket socket;
 	private PrintWriter writer;
 	private Server server;
+	private List<ClientHandler> clientList;
+	private String user = "";
 	
 	public ClientHandler(Socket socket, Server server) {
 		super();
@@ -37,14 +39,30 @@ public class ClientHandler implements Runnable {
 			while (!socket.isClosed()) {
 				String raw = reader.readLine();
 				Message message = mapper.readValue(raw, Message.class);
+				message.setTimestamp();
 
 				switch (message.getCommand()) {
 					case "connect":
 						log.info("{}: <{}> has connected", message.getTimestamp(), message.getUsername());
-						// no dups
+						this.user = message.getUsername();
+						clientList = server.getClientList();
+						message.setContents(message.getTimestamp() + ": <" + message.getUsername() + "> has connected");
+						String alert = mapper.writeValueAsString(message);
+						for(ClientHandler client: clientList) {
+							client.writer.write(alert);
+							client.writer.flush();
+						}
 						break;
 					case "disconnect":
 						log.info("{}: <{}> has disconnected", message.getTimestamp(), message.getUsername());
+						clientList = server.getClientList();
+						message.setContents(message.getTimestamp() + ": <" + message.getUsername() + "> has disconnected");
+						alert = mapper.writeValueAsString(message);
+						for(ClientHandler client: clientList) {
+							client.writer.write(alert);
+							client.writer.flush();
+						}
+						clientList.remove(this);
 						this.socket.close();
 						break;
 					case "echo":
@@ -55,12 +73,10 @@ public class ClientHandler implements Runnable {
 						break;
 					case "broadcast":
 						log.info("{} <{}> (all): {}", message.getTimestamp(), message.getUsername(), message.getContents());
-						// TO DO
-						List<ClientHandler> clientList = server.getClientList();
-						String cast = mapper.writeValueAsString(message);
+						clientList = server.getClientList();
+						response = mapper.writeValueAsString(message);
 						for(ClientHandler client: clientList) {
-							System.out.println("client: " + client);
-							client.writer.write(cast);
+							client.writer.write(response);
 							client.writer.flush();
 						}
 						break;
@@ -69,8 +85,16 @@ public class ClientHandler implements Runnable {
 						// TO DO
 						break;
 					case "users":
-						log.info("{}: currently connected users:\n {}", message.getTimestamp(), server.getClientList());
-						// TO DO
+						clientList = server.getClientList();
+						String userStr = "";
+						for(ClientHandler client: clientList) {
+							userStr += "<" + client.getUser() + ">\n";			
+						}
+							message.setContents(userStr);
+							response = mapper.writeValueAsString(message);
+							writer.write(response);
+							writer.flush();
+							log.info("{}: currently connected users:\n {}", message.getTimestamp(), userStr);
 						break;
 				}
 			}
@@ -78,6 +102,10 @@ public class ClientHandler implements Runnable {
 		} catch (IOException e) {
 			log.error("Something went wrong :/", e);
 		}
+	}
+
+	public String getUser() {
+		return user;		
 	}
 
 }
