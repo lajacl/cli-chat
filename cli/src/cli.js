@@ -37,19 +37,21 @@ cli
 
     server.on('data', (buffer) => {
       let cmd = Message.fromJSON(buffer).command
+      let txtColor = 'white'
       if (cmd === 'echo') {
-        this.log(cli.chalk['gray'](Message.fromJSON(buffer).toString()))
+        txtColor = 'cyan'
       } else if (cmd === 'broadcast') {
-        this.log(cli.chalk['blue'](Message.fromJSON(buffer).toString()))
+        txtColor = 'magenta'
       } else if (cmd === 'users') {
-        this.log(cli.chalk['cyan'](Message.fromJSON(buffer).toString()))
+        txtColor = 'white'
       } else if (cmd === 'direct') {
-        this.log(cli.chalk['magenta'](Message.fromJSON(buffer).toString()))
+        txtColor = 'gray'
       } else if (cmd === 'connect' || cmd === 'disconnect') {
-        this.log(cli.chalk['red'](Message.fromJSON(buffer).toString()))
+        txtColor = 'red'
       } else {
-        this.log(cli.chalk['white'](Message.fromJSON(buffer).toString()))
+        txtColor = 'white'
       }
+      this.log(cli.chalk[txtColor](Message.fromJSON(buffer).toString()))
     })
 
     server.on('end', () => {
@@ -85,6 +87,5 @@ cli
     }
 
     cmdPrev = cmd
-
     callback()
   })
