@@ -80,13 +80,17 @@ cli
     } else if (input.charAt(0) === '@') {
       cmd = '@' + command
       server.write(new Message({ username, command: cmd, contents }).toJSON() + '\n')
-    } else if (Message.cmdPrev !== 'undefined' && command !== 'connect') {
-      cmd = cmdPrev
-      let cnts = input
-      server.write(new Message({ username, command: cmd, contents: cnts }).toJSON() + '\n')
+    } else if (cmdPrev !== 'undefined') {
+      if (cmdPrev === 'connect' || cmdPrev === 'users') {
+        this.log('A command is required.')
+      } else {
+        cmd = cmdPrev
+        let cnts = input
+        server.write(new Message({ username, command: cmd, contents: cnts }).toJSON() + '\n')
+      }
     } else {
       cmdPrev = 'undefined'
-      this.log(`A command is required.`)
+      this.log('A command is required.')
     }
 
     cmdPrev = cmd // store the previous command
