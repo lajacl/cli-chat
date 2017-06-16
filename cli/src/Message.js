@@ -19,6 +19,7 @@ export class Message {
     })
   }
 
+  // set message format according to command used
   toString () {
     if (this.command === 'echo') {
       return `${this.timestamp} <${this.username}> (echo): ${this.contents}`

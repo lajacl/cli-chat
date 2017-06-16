@@ -16,6 +16,7 @@ cli
   .delimiter(cli.chalk['yellow']('ftd~$'))
 
 cli
+    // added host and port as optional parameters
   .mode('connect <username> [host] [port]')
   .delimiter(cli.chalk['green']('connected>'))
   .init(function (args, callback) {
@@ -34,7 +35,7 @@ cli
         callback()
       })
     }
-
+    // set colors for different types of messages
     server.on('data', (buffer) => {
       let cmd = Message.fromJSON(buffer).command
       let txtColor = 'white'
@@ -58,6 +59,8 @@ cli
       cli.exec('exit')
     })
   })
+
+  // uses the passed in command to construct a Message
   .action(function (input, callback) {
     const [ command, ...rest ] = words(input)
     const contents = rest.join(' ')
@@ -77,7 +80,7 @@ cli
     } else if (input.charAt(0) === '@') {
       cmd = '@' + command
       server.write(new Message({ username, command: cmd, contents }).toJSON() + '\n')
-    } else if (Message.cmdPrev !== 'undefined') {
+    } else if (Message.cmdPrev !== 'undefined' && command !== 'connect') {
       cmd = cmdPrev
       let cnts = input
       server.write(new Message({ username, command: cmd, contents: cnts }).toJSON() + '\n')
@@ -86,6 +89,6 @@ cli
       this.log(`A command is required.`)
     }
 
-    cmdPrev = cmd
+    cmdPrev = cmd // store the previous command
     callback()
   })

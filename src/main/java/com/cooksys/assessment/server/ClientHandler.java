@@ -17,8 +17,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ClientHandler implements Runnable {
 	private Logger log = LoggerFactory.getLogger(ClientHandler.class);
 
-	private Socket socket;
-	private PrintWriter writer;
+	public Socket socket;
+	public PrintWriter writer;
 	private Server server;
 	private List<ClientHandler> clientList;
 	private String user = "";
@@ -43,13 +43,17 @@ public class ClientHandler implements Runnable {
 				
 				message.setTimestamp();
 				
-				// check if a direct message
+				// check if a direct message was sent and set the command
 				if (message.getCommand().charAt(0) == '@') {
 					receiver = message.getCommand().substring(1);
 					message.setCommand("direct");
 				}
 				
+				/*
+				 * Handles message commands and returns a response to the client
+				 */
 				switch (message.getCommand()) {
+					
 					case "connect":
 						log.info("{}: <{}> has connected", message.getTimestamp(), message.getUsername());
 						this.user = message.getUsername();
@@ -88,9 +92,9 @@ public class ClientHandler implements Runnable {
 							client.writer.flush();
 						}
 						break;
+					// loops through 
 					case "direct":
 						log.info("{} <{}> (whisper): {}", message.getTimestamp(), message.getUsername(), message.getContents());
-						// TO DO
 						response = mapper.writeValueAsString(message);
 						clientList = server.getClientList();						
 						for(ClientHandler client: clientList) {
@@ -101,6 +105,7 @@ public class ClientHandler implements Runnable {
 							}
 						}						
 						break;
+					// loop through clients and pull usernames
 					case "users":
 						clientList = server.getClientList();
 						String userStr = "";
@@ -111,7 +116,7 @@ public class ClientHandler implements Runnable {
 							response = mapper.writeValueAsString(message);
 							writer.write(response);
 							writer.flush();
-							log.info("{}: currently connected users:\n {}", message.getTimestamp(), userStr);
+							log.info("{}: currently connected users:\n{}", message.getTimestamp(), userStr);
 						break;
 				}
 			}

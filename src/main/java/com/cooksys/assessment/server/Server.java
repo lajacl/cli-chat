@@ -31,7 +31,7 @@ public class Server implements Runnable {
 			while (true) {
 				Socket socket = ss.accept();
 				ClientHandler handler = new ClientHandler(socket, this);
-				clientList.add(handler);
+				clientList.add(handler); // keep track of new clients
 				executor.execute(handler);
 			}
 		} catch (IOException e) {
