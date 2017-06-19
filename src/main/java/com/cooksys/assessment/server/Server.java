@@ -3,8 +3,7 @@ package com.cooksys.assessment.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 
 import org.slf4j.Logger;
@@ -15,7 +14,7 @@ public class Server implements Runnable {
 	
 	private int port;
 	private ExecutorService executor;
-	static private ArrayList<ClientHandler> clientList = new ArrayList<ClientHandler>();
+	static private HashSet<ClientHandler> clientList = new HashSet<ClientHandler>();
 	
 	public Server(int port, ExecutorService executor) {
 		super();
@@ -31,7 +30,7 @@ public class Server implements Runnable {
 			while (true) {
 				Socket socket = ss.accept();
 				ClientHandler handler = new ClientHandler(socket, this);
-				clientList.add(handler); // keep track of new clients
+				clientList.add(handler);
 				executor.execute(handler);
 			}
 		} catch (IOException e) {
@@ -39,8 +38,8 @@ public class Server implements Runnable {
 		}
 	}
 	
-	public List<ClientHandler> getClientList() {
+	public HashSet<ClientHandler> getClientList() {
 		return clientList;
 	}
-
+	
 }

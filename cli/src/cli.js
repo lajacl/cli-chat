@@ -81,7 +81,7 @@ cli
       cmd = '@' + command
       server.write(new Message({ username, command: cmd, contents }).toJSON() + '\n')
     } else if (cmdPrev !== 'undefined') {
-      if (cmdPrev === 'connect' || cmdPrev === 'users') {
+      if (cmdPrev === 'users') {
         this.log('A command is required.')
       } else {
         cmd = cmdPrev
